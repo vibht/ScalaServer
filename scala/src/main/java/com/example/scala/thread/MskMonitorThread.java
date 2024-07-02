@@ -15,11 +15,12 @@ public class MskMonitorThread implements Runnable {
         this.command = command;
     }
 
-    public void processCommand() {
+    public void processCommand()throws InterruptedException {
         int count = 0;
 
         while (count <= 3) {
             try {
+                Thread.sleep(2000);
                 logger.info("Hello------------ Count: " + count);
                 count++;
             } catch (Exception e) {
@@ -33,7 +34,11 @@ public class MskMonitorThread implements Runnable {
     @Override
     public void run() {
         logger.info(Thread.currentThread().getName() + " Start. Command = " + command);
-        processCommand();
+        try {
+            processCommand();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         logger.info(Thread.currentThread().getName() + " End.");
     }
 }

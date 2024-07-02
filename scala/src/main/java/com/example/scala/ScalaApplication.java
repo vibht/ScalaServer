@@ -15,8 +15,6 @@ public class ScalaApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(ScalaApplication.class, args);
-
-
 	}
 
 	@Bean

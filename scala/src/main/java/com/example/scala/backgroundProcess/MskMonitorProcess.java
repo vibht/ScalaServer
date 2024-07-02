@@ -31,7 +31,7 @@ public class MskMonitorProcess {
                 new ArrayBlockingQueue<>(2),
                 new CustomThreadFactory("pool-num"),
                 new CustomRejectionHandler());
-                scheduleTask();
+        scheduleTask();
     }
 
     @Scheduled(fixedRate = 5000)
@@ -41,9 +41,9 @@ public class MskMonitorProcess {
         executor.execute(() -> {
             try {
                 Thread.sleep(2000);
-                MskMonitorThread task = new MskMonitorThread(userService, "Sample Command");
+                // MskMonitorThread task = new MskMonitorThread(userService, "Sample Command");
                 logger.info("Submitting task to executor");
-                executor.execute(task);
+                executor.execute(new MskMonitorThread(userService, "Sample Command"));
             } catch (InterruptedException e) {
                 logger.error("Interrupted Exception", e);
                 Thread.currentThread().interrupt();
