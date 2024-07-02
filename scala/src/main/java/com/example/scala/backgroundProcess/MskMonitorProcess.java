@@ -38,18 +38,21 @@ public class MskMonitorProcess {
     public void scheduleTask() {
         logger.info("Scheduled task started");
 
-        executor.execute(() -> {
-            try {
-                Thread.sleep(2000);
-                // MskMonitorThread task = new MskMonitorThread(userService, "Sample Command");
-                logger.info("Submitting task to executor");
-                executor.execute(new MskMonitorThread(userService, "Sample Command"));
-            } catch (InterruptedException e) {
-                logger.error("Interrupted Exception", e);
-                Thread.currentThread().interrupt();
-            }
-            logger.info("Task in Process: " + Thread.currentThread().getName());
-        });
+        // task CustomRejectHandler Testing purpose for loop addon
+        // for (int i = 0; i <= 10; i++) {
+            executor.execute(() -> {
+                try {
+                    Thread.sleep(2000);
+                    // MskMonitorThread task = new MskMonitorThread(userService, "Sample Command");
+                    logger.info("Submitting task to executor");
+                    executor.execute(new MskMonitorThread(userService, "Sample Command"));
+                } catch (InterruptedException e) {
+                    logger.error("Interrupted Exception", e);
+                    Thread.currentThread().interrupt();
+                }
+                logger.info("Task in Process: " + Thread.currentThread().getName());
+            });
+        // }
 
         logger.info("Scheduled task finished");
     }
