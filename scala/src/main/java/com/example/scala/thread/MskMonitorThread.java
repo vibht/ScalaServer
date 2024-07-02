@@ -2,32 +2,38 @@ package com.example.scala.thread;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
 import com.example.scala.repositoty.UserserviceRepository;
 
 public class MskMonitorThread implements Runnable {
-   private static final Logger logger = LogManager.getLogger(MskMonitorThread.class);
+    private static final Logger logger = LogManager.getLogger(MskMonitorThread.class);
 
-   private UserserviceRepository userServiceRepo;
+    private final UserserviceRepository userService;
+    private String command;
 
-   public MskMonitorThread(UserserviceRepository userService) {
-      run();
-      this.userServiceRepo =userService;
-   }
+    public MskMonitorThread(UserserviceRepository userService, String command) {
+        this.userService = userService;
+        this.command = command;
+    }
 
-   @Override
-   public void run() {
-      Integer count = 0;
+    public void processCommand() {
+        int count = 0;
 
-      while (count <= 3) {
+        while (count <= 3) {
+            try {
+                logger.info("Hello------------ Count: " + count);
+                count++;
+            } catch (Exception e) {
+                Thread.currentThread().interrupt();
+                logger.error("Exception in thread", e);
+                throw new UnsupportedOperationException("Unimplemented method 'run'", e);
+            }
+        }
+    }
 
-         try {
-            logger.info("Hello------------");
-            count++;
-         } catch (Exception e) {
-            logger.error("Exception in thread", e);
-            throw new UnsupportedOperationException("Unimplemented method 'run'", e);
-         }
-      }
-   }
+    @Override
+    public void run() {
+        logger.info(Thread.currentThread().getName() + " Start. Command = " + command);
+        processCommand();
+        logger.info(Thread.currentThread().getName() + " End.");
+    }
 }
