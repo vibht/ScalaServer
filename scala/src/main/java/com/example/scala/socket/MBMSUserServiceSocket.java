@@ -9,8 +9,8 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 @Service
-public class MBMSUserService {
-    private static final Logger logger = LogManager.getLogger(MBMSUserService.class);
+public class MBMSUserServiceSocket {
+    private static final Logger logger = LogManager.getLogger(MBMSUserServiceSocket.class);
 
     public String userServiceAuthenticate() {
         try {
