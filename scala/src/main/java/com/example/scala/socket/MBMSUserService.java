@@ -4,10 +4,13 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 @Service
 public class MBMSUserService {
+    private static final Logger logger = LogManager.getLogger(MBMSUserService.class);
 
     public String userServiceAuthenticate() {
         try {
@@ -29,6 +32,8 @@ public class MBMSUserService {
             socket.send(packet);
 
         } catch (Exception e) {
+            e.printStackTrace();
+            logger.info("Errro are found When Service is Send To UE {}", e.getMessage());
 
         }
         return null;
