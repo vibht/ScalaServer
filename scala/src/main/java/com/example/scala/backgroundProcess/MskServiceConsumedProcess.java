@@ -6,16 +6,22 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.example.scala.helper.CustomRejectionHandler;
 import com.example.scala.helper.CustomThreadFactory;
+import com.example.scala.socket.MBMSUserServiceSocket;
 import com.example.scala.thread.MskServiceConsumedThread;
 
 @Service
 public class MskServiceConsumedProcess {
     private static final Logger logger = LogManager.getLogger(MskServiceConsumedProcess.class);
+
+    @Autowired
+    private MBMSUserServiceSocket service;
+
 
     private final ThreadPoolExecutor executor;
 
@@ -32,7 +38,7 @@ public class MskServiceConsumedProcess {
         executor.execute(() -> {
             try {
                 logger.info("Task Schedule is Start..");
-                executor.execute(new MskServiceConsumedThread());
+                executor.execute(new MskServiceConsumedThread(service));
 
             } catch (Exception e) {
                 // TODO: handle exception

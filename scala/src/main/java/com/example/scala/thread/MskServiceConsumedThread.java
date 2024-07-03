@@ -6,18 +6,26 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
+import com.example.scala.socket.MBMSUserServiceSocket;
+
 @Service
 public class MskServiceConsumedThread implements Runnable {
 
     private static final Logger logger = LogManager.getLogger(MskServiceConsumedThread.class);
 
-    public MskServiceConsumedThread() {
+    private MBMSUserServiceSocket service;
+   
+
+    public MskServiceConsumedThread(MBMSUserServiceSocket service) {
+        this.service = service;
 
     }
 
-    public void ConsumedServiceInClient() throws InterruptedException {
-        for (int i = 0; i <= 10; i++) {
+    public void ConsumedServiceInClient() throws Exception {
+        for (int i = 0; i < 1; i++) {
+            
             logger.info("consumed Service" + i);
+            service.RecieveClientAckno();
             Thread.sleep(2000);
         }
     }
