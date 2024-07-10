@@ -14,7 +14,6 @@ public class MskServiceConsumedThread implements Runnable {
     private static final Logger logger = LogManager.getLogger(MskServiceConsumedThread.class);
 
     private MBMSUserServiceSocket service;
-   
 
     public MskServiceConsumedThread(MBMSUserServiceSocket service) {
         this.service = service;
@@ -23,9 +22,9 @@ public class MskServiceConsumedThread implements Runnable {
 
     public void ConsumedServiceInClient() throws Exception {
         for (int i = 0; i < 1; i++) {
-            
+
             logger.info("consumed Service" + i);
-            service.RecieveClientAckno();
+            // service.RecieveClientAckno();
             Thread.sleep(2000);
         }
     }

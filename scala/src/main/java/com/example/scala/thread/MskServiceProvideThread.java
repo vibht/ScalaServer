@@ -19,7 +19,7 @@ public class MskServiceProvideThread implements Runnable {
     public void run() {
         try {
             for (int i = 0; i < 1; i++) {
-                provideService.sendUserServiceToUE();
+                // provideService.sendUserServiceToUE();
                 logger.info("Provide Service" + i);
                 Thread.sleep(2000);
 
