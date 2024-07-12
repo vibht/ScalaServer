@@ -84,4 +84,38 @@ public class MBMSUserServiceSocket {
         }
     }
 
+    long sum;
+
+    // Synchronized method to perform addition and notify the consumer
+    public synchronized Long provideAddPerform() {
+        try {
+            System.out.println("Provider started..");
+            for (int i = 0; i < 5; i++) {
+                sum += i;
+            }
+            isFlag = true;
+            notify();
+            System.out.println("Provider notified...");
+            return sum;
+        } catch (Exception e) {
+            return 12L;
+        }
+    }
+
+    // Synchronized method to wait for the provider's notification and consume the
+    // result
+    public synchronized long consumed() {
+        try {
+            System.out.println("Consumer started...");
+            while (!isFlag) {
+                System.out.println("Consumer is waiting...");
+                wait();
+            }
+            System.out.println("Consumer finished...");
+            return sum;
+        } catch (Exception e) {
+            return 22L;
+        }
+    }
+
 }
