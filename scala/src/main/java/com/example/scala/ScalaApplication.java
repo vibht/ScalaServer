@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-import com.example.scala.backgroundProcess.MskMonitorProcess;
+import com.example.scala.service.ServerHealthUsingSNMP;
 import com.example.scala.thread.xmppSendServiceRequestThread;
 
 @SpringBootApplication
@@ -17,9 +17,18 @@ public class ScalaApplication {
 	@Autowired
 	private xmppSendServiceRequestThread XmppSendServiceRequest;
 
+	// @Autowired
+	// private ServerHealthUsingSNMP serverHealthUsingSNMP;
+
 	public static void main(String[] args) {
+
+		ServerHealthUsingSNMP serverHealthUsingSNMP =new ServerHealthUsingSNMP();
+
 		SpringApplication.run(ScalaApplication.class, args);
 		// XmppSendServiceRequest.getRequestServiceFromClientUsingXmpp();
+
+		
+		
 	
 	}
 
