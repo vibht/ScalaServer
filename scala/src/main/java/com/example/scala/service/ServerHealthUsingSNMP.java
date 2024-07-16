@@ -1,5 +1,7 @@
 package com.example.scala.service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 
 import org.apache.logging.log4j.LogManager;
@@ -17,6 +19,8 @@ import org.snmp4j.smi.VariableBinding;
 import org.snmp4j.transport.DefaultUdpTransportMapping;
 import org.springframework.stereotype.Service;
 
+import com.example.scala.model.SNMPModel;
+
 @Service
 public class ServerHealthUsingSNMP {
 
@@ -28,7 +32,7 @@ public class ServerHealthUsingSNMP {
 
         // sendHealthCheckInfoToClient();
         getCupLoad();
-        getRamInfo(); 
+        getRamInfo();
     }
 
     public boolean sendHealthCheckInfoToClient() {
@@ -42,10 +46,15 @@ public class ServerHealthUsingSNMP {
 
     }
 
-    public Vector<? extends VariableBinding> getCupLoad() {
+    public SNMPModel getCupLoad() {
+
+        SNMPModel returnValues = new SNMPModel();
+        List<SNMPModel> cpuInfoList = new ArrayList<>();
+        Snmp snmp = null;
+        TransportMapping<UdpAddress> transport = null;
 
         try {
-            TransportMapping<UdpAddress> transport = new DefaultUdpTransportMapping();
+            transport = new DefaultUdpTransportMapping();
             transport.listen();
 
             CommunityTarget target = new CommunityTarget();
@@ -61,7 +70,7 @@ public class ServerHealthUsingSNMP {
             pdu.add(new VariableBinding(new OID(".1.3.6.1.4.1.2021.10.1.3.3")));
             pdu.setType(PDU.GET);
 
-            Snmp snmp = new Snmp(transport);
+            snmp = new Snmp(transport);
             logger.info("Sending Request To Agent");
             ResponseEvent response = snmp.send(pdu, target);
 
@@ -78,8 +87,24 @@ public class ServerHealthUsingSNMP {
 
                     if (errorStatus == PDU.noError) {
 
-                        logger.info("CPU Load: In 1 Minute {} : 5 Minutes {} : 15 Minutes {} "
-                                + responsePDU.getVariableBindings());
+                        data = responsePDU.getVariableBindings();
+
+                        cpuInfoList.add(setRamInfoFromPDU(responsePDU, new OID(".1.3.6.1.4.1.2021.10.1.3.1"),
+                                "1 Minutes CPU Load", errorStatusText));
+                        cpuInfoList.add(setRamInfoFromPDU(responsePDU, new OID(".1.3.6.1.4.1.2021.10.1.3.2"),
+                                "5 Minutes CPU Load", errorStatusText));
+                        cpuInfoList.add(setRamInfoFromPDU(responsePDU, new OID(".1.3.6.1.4.1.2021.10.1.3.3"),
+                                "15 Minutes CPU Load", errorStatusText));
+
+                        for (SNMPModel info : cpuInfoList) {
+                            logger.info("CPU Load: {}", info);
+                        }
+
+                        logger.info("CPU Load: In 1 Minute: {} | 5 Minutes: {} | 15 Minutes: {}",
+                                data.get(0).getVariable(), data.get(1).getVariable(), data.get(2).getVariable());
+
+                        // logger.info("CPU Load: In 1 Minute {} : 5 Minutes {} : 15 Minutes {} "
+                        // + responsePDU.getVariableBindings());
                     } else {
                         logger.info("Error: Request Failed");
                         logger.info("Error Status = {}", errorStatus);
@@ -89,27 +114,40 @@ public class ServerHealthUsingSNMP {
                 } else {
                     logger.info("Error: Response PDU is null");
                 }
-                return data;
+
             } else {
                 logger.info("Error: Agent Timeout...");
             }
             snmp.close();
 
             isFalg = true;
-            return null;
 
         } catch (Exception e) {
             e.printStackTrace();
             logger.info("The Data is Not Found SomeThing went wrong!! {}", e.getMessage());
-            return null;
+
+        } finally {
+            try {
+                if (snmp != null)
+                    snmp.close();
+                if (transport != null)
+                    transport.close();
+            } catch (Exception e) {
+                logger.error("Error closing resources: {}", e.getMessage(), e);
+            }
         }
+        return returnValues;
 
     }
 
-    public Vector<? extends VariableBinding> getRamInfo() {
-        try {
+    public SNMPModel getRamInfo() {
+        SNMPModel returnValues = new SNMPModel();
+        List<SNMPModel> ramInfoList = new ArrayList<>();
+        TransportMapping<UdpAddress> transport = null;
+        Snmp snmp = null;
 
-            TransportMapping<UdpAddress> transport = new DefaultUdpTransportMapping();
+        try {
+            transport = new DefaultUdpTransportMapping();
             transport.listen();
 
             CommunityTarget target = new CommunityTarget();
@@ -126,13 +164,12 @@ public class ServerHealthUsingSNMP {
             pdu.add(new VariableBinding(new OID(".1.3.6.1.4.1.2021.4.13.0")));
             pdu.setType(PDU.GET);
 
-            Snmp snmp = new Snmp(transport);
+            snmp = new Snmp(transport);
             ResponseEvent response = snmp.send(pdu, target);
 
             if (response != null) {
                 logger.info("Got Response from Agent");
                 PDU responsePDU = response.getResponse();
-                Vector<? extends VariableBinding> data = responsePDU.getVariableBindings();
 
                 if (responsePDU != null) {
                     int errorStatus = responsePDU.getErrorStatus();
@@ -140,33 +177,63 @@ public class ServerHealthUsingSNMP {
                     String errorStatusText = responsePDU.getErrorStatusText();
 
                     if (errorStatus == PDU.noError) {
+                        ramInfoList.add(setRamInfoFromPDU(responsePDU, new OID(".1.3.6.1.4.1.2021.4.5.0"), "Total Ram",
+                                errorStatusText));
+                        ramInfoList.add(setRamInfoFromPDU(responsePDU, new OID(".1.3.6.1.4.1.2021.4.6.0"),
+                                "Total Used Ram", errorStatusText));
+                        ramInfoList.add(setRamInfoFromPDU(responsePDU, new OID(".1.3.6.1.4.1.2021.4.11.0"),
+                                "Total Ram Free", errorStatusText));
+                        ramInfoList.add(setRamInfoFromPDU(responsePDU, new OID(".1.3.6.1.4.1.2021.4.13.0"),
+                                "Total Shared Ram", errorStatusText));
 
-                        logger.info(
-                                "RAM Info: In Total Ram {} : Total Used Ram {} : Total Ram Free{} : Total Shared Ram {} "
-                                        + responsePDU.getVariableBindings());
+                        for (SNMPModel info : ramInfoList) {
+                            logger.info("RAM Info: {}", info);
+                        }
                     } else {
-                        logger.info("Error: Request Failed");
-                        logger.info("Error Status = {}", errorStatus);
-                        logger.info("Error Index = {}", errorIndex);
-                        logger.info("Error Status Text = {} ", errorStatusText);
+                        logger.error("Error: Request Failed - Status = {}, Index = {}, Text = {}", errorStatus,
+                                errorIndex, errorStatusText);
                     }
                 } else {
-                    logger.info("Error: Response PDU is null");
+                    logger.error("Error: Response PDU is null");
                 }
-                return data;
             } else {
-                logger.info("Error: Agent Timeout...");
+                logger.error("Error: Agent Timeout...");
             }
-            snmp.close();
-
-            isFalg = true;
-            return null;
-
         } catch (Exception e) {
-            e.printStackTrace();
-            logger.info("The Data is Not Found SomeThing went wrong!! {}", e.getMessage());
-            return null;
+            logger.error("Exception: {}", e.getMessage(), e);
+        } finally {
+            try {
+                if (snmp != null)
+                    snmp.close();
+                if (transport != null)
+                    transport.close();
+            } catch (Exception e) {
+                logger.error("Error closing resources: {}", e.getMessage(), e);
+            }
         }
-
+        return returnValues;
     }
+
+    private SNMPModel setRamInfoFromPDU(PDU responsePDU, OID oid, String id, String errorStatusText) {
+        SNMPModel returnValues = new SNMPModel();
+        VariableBinding vb = getSpecificVariableBinding(responsePDU, oid);
+        if (vb != null) {
+            returnValues.setDescription(errorStatusText);
+            returnValues.setOIds(vb.getOid());
+            returnValues.setValues(vb.getVariable().toString());
+            returnValues.setIds(id);
+            returnValues.setSummary(vb);
+        }
+        return returnValues;
+    }
+
+    private VariableBinding getSpecificVariableBinding(PDU responsePDU, OID oid) {
+        for (VariableBinding vb : responsePDU.getVariableBindings()) {
+            if (vb.getOid().equals(oid)) {
+                return vb;
+            }
+        }
+        return null;
+    }
+
 }
