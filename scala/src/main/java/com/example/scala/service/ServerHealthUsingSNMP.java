@@ -31,8 +31,8 @@ public class ServerHealthUsingSNMP {
     public ServerHealthUsingSNMP() {
 
         // sendHealthCheckInfoToClient();
-        getCupLoad();
-        getRamInfo();
+        // getCupLoad();
+        // getRamInfo();
     }
 
     public boolean sendHealthCheckInfoToClient() {
