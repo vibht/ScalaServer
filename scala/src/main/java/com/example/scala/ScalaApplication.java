@@ -22,14 +22,11 @@ public class ScalaApplication {
 
 	public static void main(String[] args) {
 
-		ServerHealthUsingSNMP serverHealthUsingSNMP =new ServerHealthUsingSNMP();
+		ServerHealthUsingSNMP serverHealthUsingSNMP = new ServerHealthUsingSNMP();
 
 		SpringApplication.run(ScalaApplication.class, args);
 		// XmppSendServiceRequest.getRequestServiceFromClientUsingXmpp();
 
-		
-		
-	
 	}
 
 	@Bean

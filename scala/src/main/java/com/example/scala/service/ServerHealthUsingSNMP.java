@@ -2,6 +2,7 @@ package com.example.scala.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.Vector;
 
 import org.apache.logging.log4j.LogManager;
@@ -31,8 +32,8 @@ public class ServerHealthUsingSNMP {
     public ServerHealthUsingSNMP() {
 
         // sendHealthCheckInfoToClient();
-        // getCupLoad();
-        // getRamInfo();
+        getCupLoad();
+        getRamInfo();
     }
 
     public boolean sendHealthCheckInfoToClient() {
@@ -52,6 +53,7 @@ public class ServerHealthUsingSNMP {
         List<SNMPModel> cpuInfoList = new ArrayList<>();
         Snmp snmp = null;
         TransportMapping<UdpAddress> transport = null;
+        List<SNMPModel> cpuInfo = new ArrayList<>();
 
         try {
             transport = new DefaultUdpTransportMapping();
@@ -97,8 +99,19 @@ public class ServerHealthUsingSNMP {
                                 "15 Minutes CPU Load", errorStatusText));
 
                         for (SNMPModel info : cpuInfoList) {
+                            cpuInfo.add(info);
+
+                            returnValues.setIds(info.getIds());
+                            returnValues.setDescription("CPU Information In Server Check Health");
+                            returnValues.setOIds(info.getOIds());
+                            returnValues.setSummary(cpuInfo);
+                            returnValues.setValues(info.getValues());
+                                  
+
+                                    
                             logger.info("CPU Load: {}", info);
                         }
+
 
                         logger.info("CPU Load: In 1 Minute: {} | 5 Minutes: {} | 15 Minutes: {}",
                                 data.get(0).getVariable(), data.get(1).getVariable(), data.get(2).getVariable());
@@ -136,6 +149,7 @@ public class ServerHealthUsingSNMP {
                 logger.error("Error closing resources: {}", e.getMessage(), e);
             }
         }
+
         return returnValues;
 
     }
@@ -176,6 +190,8 @@ public class ServerHealthUsingSNMP {
                     int errorIndex = responsePDU.getErrorIndex();
                     String errorStatusText = responsePDU.getErrorStatusText();
 
+                    Vector<? extends VariableBinding> data = responsePDU.getVariableBindings();
+
                     if (errorStatus == PDU.noError) {
                         ramInfoList.add(setRamInfoFromPDU(responsePDU, new OID(".1.3.6.1.4.1.2021.4.5.0"), "Total Ram",
                                 errorStatusText));
@@ -187,8 +203,17 @@ public class ServerHealthUsingSNMP {
                                 "Total Shared Ram", errorStatusText));
 
                         for (SNMPModel info : ramInfoList) {
+                            ramInfoList.add(info);
+
+                            returnValues.setIds(info.getIds());
+                            returnValues.setOIds(info.getOIds());
+                            returnValues.setDescription("Ram Information In Server Check Health");
+                            returnValues.setSummary(ramInfoList);
+                            returnValues.setValues(info.getValues());
+                                   
                             logger.info("RAM Info: {}", info);
                         }
+
                     } else {
                         logger.error("Error: Request Failed - Status = {}, Index = {}, Text = {}", errorStatus,
                                 errorIndex, errorStatusText);
@@ -211,6 +236,7 @@ public class ServerHealthUsingSNMP {
                 logger.error("Error closing resources: {}", e.getMessage(), e);
             }
         }
+
         return returnValues;
     }
 

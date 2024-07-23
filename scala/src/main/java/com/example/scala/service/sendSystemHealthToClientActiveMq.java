@@ -43,6 +43,8 @@ public class sendSystemHealthToClientActiveMq {
 
             SNMPModel cpu = snmp.getCupLoad();
             SNMPModel ram = snmp.getRamInfo();
+            System.out.println("========== CPU ==============="+cpu);
+            System.out.println("================= RAM ================="+ram);
             lstValue.add(cpu);
             lstValue.add(ram);
 
