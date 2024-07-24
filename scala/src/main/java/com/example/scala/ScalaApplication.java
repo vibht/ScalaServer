@@ -8,6 +8,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import com.example.scala.service.ServerHealthUsingSNMP;
+import com.example.scala.service.sendSystemHealthToClientActiveMq;
 import com.example.scala.thread.xmppSendServiceRequestThread;
 
 @SpringBootApplication
@@ -23,6 +24,15 @@ public class ScalaApplication {
 	public static void main(String[] args) {
 
 		ServerHealthUsingSNMP serverHealthUsingSNMP = new ServerHealthUsingSNMP();
+
+        Thread firstAppThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                sendSystemHealthToClientActiveMq.sendToClientSystemHealthReport(null);
+            }
+        });
+
+        firstAppThread.start();
 
 		SpringApplication.run(ScalaApplication.class, args);
 		// XmppSendServiceRequest.getRequestServiceFromClientUsingXmpp();
