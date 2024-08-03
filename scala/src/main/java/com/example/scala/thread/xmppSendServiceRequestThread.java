@@ -10,9 +10,8 @@ import org.jxmpp.jid.EntityBareJid;
 import org.jxmpp.jid.impl.JidCreate;
 import org.springframework.stereotype.Service;
 
-import jakarta.annotation.PostConstruct;
-
 import org.jivesoftware.smack.packet.Message;
+import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.chat2.Chat;
 import org.jivesoftware.smack.chat2.ChatManager;
 
@@ -37,6 +36,11 @@ public class xmppSendServiceRequestThread implements Runnable {
             AbstractXMPPConnection connection = new XMPPTCPConnection(config);
             connection.connect().login();
 
+              // Set presence to available
+            Presence availablePresence = new Presence(Presence.Type.available);
+            availablePresence.setStatus("Available to chat");
+            connection.sendStanza(availablePresence);
+
             ChatManager chatManager = ChatManager.getInstanceFor(connection);
             EntityBareJid jid = JidCreate.entityBareFrom("user3@gui.coraltele.com");
             Chat chat = chatManager.chatWith(jid);
@@ -44,6 +48,13 @@ public class xmppSendServiceRequestThread implements Runnable {
             Message message = new Message(jid, Message.Type.chat);
             message.setBody("Hello, this is a message from user1!");
             chat.send(message);
+
+
+             // Set presence to away
+            Presence awayPresence = new Presence(Presence.Type.available);
+            awayPresence.setStatus("Away for lunch");
+            awayPresence.setMode(Presence.Mode.away);
+            connection.sendStanza(awayPresence);
 
             connection.disconnect();
             return "The Message Request Service is Send Successfully";

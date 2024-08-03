@@ -16,6 +16,19 @@ public class sendSystemHealthToClientActiveMq {
 
     public static void sendToClientSystemHealthReport(String[] args) {
 
+        // IF You want to use embedded broker than use it Start the embedded broker
+
+        // ====================== EXAMPLES ================================
+
+        // BrokerService broker = new BrokerService();
+        // broker.setBrokerName("embeddedBroker");
+        // broker.addConnector("tcp://localhost:61616");
+        // broker.setPersistent(false); // Using in-memory storage for simplicity
+        // broker.start();
+        // System.out.println("Embedded Broker started...");
+
+        // ===================== END ==============================
+
         ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory("tcp://localhost:61616");
 
         Connection connection = null;
@@ -27,9 +40,9 @@ public class sendSystemHealthToClientActiveMq {
 
             Queue queue = session.createQueue("SNMP.QUEUE");
 
-            // Create a MessageProducer from the Session to the Queue
+            // Create a MessageProducer from the Session to the Queue and is message Durable
             MessageProducer producer = session.createProducer(queue);
-            producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+            producer.setDeliveryMode(DeliveryMode.PERSISTENT);
 
             ServerHealthUsingSNMP snmp = new ServerHealthUsingSNMP();
 
@@ -43,15 +56,27 @@ public class sendSystemHealthToClientActiveMq {
             TextMessage message = session.createTextMessage(lstValue.toString());
             producer.send(message);
 
+            // I want send messages to different Destinations from a single MessageProducer
+
+            // ===================== EXAMPLE ==============================
+
+            // MessageProducer producer = session.createProducer(null);
+            // producer.send(someDestination, message);
+            // producer.send(anotherDestination, message);
+
+            // ===================== END ==============================
+
             System.out.println("Message sent: " + message.getText());
 
-            // Use the correct confirmation queue name
             Queue confirmationQueue = session.createQueue("CONFIRMATION.SNMP.QUEUE");
 
             MessageConsumer consumer = session.createConsumer(confirmationQueue);
-
-            // Wait for a confirmation message
             Message confirmationMessage = consumer.receive(20000); // Wait for 20 seconds
+
+            // Stop the broker (optional, as the application exits)
+            
+            // broker.stop();
+            // System.out.println("Broker stopped...");
 
             if (confirmationMessage instanceof TextMessage) {
                 TextMessage textMessage = (TextMessage) confirmationMessage;
