@@ -9,7 +9,8 @@ import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
 import org.jxmpp.jid.EntityBareJid;
 import org.jxmpp.jid.impl.JidCreate;
 import org.springframework.stereotype.Service;
-
+// import org.jivesoftware.smackx.jingle.element.
+// import org.jivesoftware.smackx.jingle.element.JingleFileTransfer;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.chat2.Chat;
@@ -36,6 +37,7 @@ public class xmppSendServiceRequestThread implements Runnable {
             AbstractXMPPConnection connection = new XMPPTCPConnection(config);
             connection.connect().login();
 
+
               // Set presence to available
             Presence availablePresence = new Presence(Presence.Type.available);
             availablePresence.setStatus("Available to chat");
@@ -46,7 +48,7 @@ public class xmppSendServiceRequestThread implements Runnable {
             Chat chat = chatManager.chatWith(jid);
 
             Message message = new Message(jid, Message.Type.chat);
-            message.setBody("Hello, this is a message from user1!");
+            message.setBody("Hello, this is a message from client Where Server Is Ready To Start..!");
             chat.send(message);
 
 
